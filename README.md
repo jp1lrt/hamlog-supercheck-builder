@@ -1,4 +1,4 @@
-# SuperCheck Builder
+# SuperCheck Builder（Turbo HAMLOG CSV → スーパー・チェック）
 
 [![Release](https://img.shields.io/github/v/release/jp1lrt/hamlog-supercheck-builder?label=release&color=green)](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest) [![SHA256 verified](https://img.shields.io/badge/SHA256-verified-brightgreen)](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -37,26 +37,27 @@ shasum -a 256 -c supercheck_builder.exe.sha256
 - Windows の場合、SmartScreen 等で警告が出ることがありますが、ファイルのハッシュが一致していればビルド元と同一であることが確認できます。警告の扱いについて不明な点があればサポートします。
 ---
 
-## 目次
-- [特徴](#特徴)
-- [前提条件](#前提条件)
-- [ダウンロード（Windows）](#ダウンロードwindows)
-- [使い方（GUI）](#使い方gui)
-- [使い方（CLI）](#使い方cli)
-- [配布ファイルの検証方法（SHA256）](#配布ファイルの検証方法sha256)
-- [ソースからのビルド（開発者向け）](#ソースからのビルド開発者向け)
-- [ビルドメタ情報の記録](#ビルドメタ情報の記録)
-- [貢献・報告](#貢献報告)
-- [著者 / 連絡先](#著者--連絡先)
-- [ライセンス](#ライセンス)
+## 重要：拡張子（.spc / .pck）について
+
+このツールは **.spc（zLog）** と **.pck（CTESTWIN）** のどちらでも出力できます。
+
+また、運用上のポイントとして：
+
+**「.spc で出力したファイルは、拡張子を .pck にリネームして CTESTWIN で使用できます」**
+
+例：  
+`TEST.spc` → `TEST.pck`
 
 ---
 
 ## 特徴
-- Turbo HAMLOG の CSV から、zLog / CTESTWIN 形式のスーパー・チェックリストを生成します。  
-- GUI（tkinter）で直感的に操作可能。  
-- CLI でバッチ処理やスクリプト組み込みが可能。  
-- 配布用 Windows 実行ファイル（.exe）を Releases に添付。
+
+- Turbo HAMLOG の CSV から **国内局（JCC/JCG が入っている行）** を抽出
+- 既存のパーシャルリスト（任意）と **マージ**
+- コールサインで **ソート**
+- 重複は **自動削除**（同一CALLは **CSV側を優先**）
+- GUI（tkinter）で直感的に操作可能
+- Windows用の単体 `.exe` を Releases で配布
 
 ---
 
@@ -75,6 +76,14 @@ shasum -a 256 -c supercheck_builder.exe.sha256
 
 配布ファイル（リリース）にはビルドのトレーサビリティ情報（ビルド元コミット、SHA256、ビルド日時）をリリースノートに記載しています。
 
+---
+
+## 入力（Turbo HAMLOG CSV）について
+
+- 入力は **Turbo HAMLOG が出力した CSV** を想定しています
+- 国内局は **JCC/JCG コード** が含まれる行だけ採用します（例：`1304` / `47003G` など）
+- 海外局など **JCC/JCG が無い行** は（設定により）除外できます  
+  ※もし取り切れないケースがあっても、最終的に海外局は手動で削除する運用でもOKです
 ---
 
 ## 使い方（GUI）
