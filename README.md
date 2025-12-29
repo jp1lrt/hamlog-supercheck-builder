@@ -8,33 +8,6 @@
 最新版の `supercheck_builder.exe` は GitHub Releases からダウンロードしてください：  
 https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest
 
-## 簡単な検証手順（ダウンロード直後に推奨）
-
-ダウンロード直後に次の手順でファイルの整合性を確認してください。
-
-1. ファイル名を確認します（例: `supercheck_builder.exe`）。  
-2. SHA256 を計算し、リリースページまたは添付の `.sha256` ファイルに記載されたハッシュ値と照合します。
-
-Windows（PowerShell / CMD）:
-```powershell
-certutil -hashfile supercheck_builder.exe SHA256
-```
-
-Linux / macOS / Git Bash:
-```bash
-shasum -a 256 supercheck_builder.exe
-```
-
-`.sha256` ファイルを一緒にダウンロードした場合（自動照合）
-```bash
-shasum -a 256 -c supercheck_builder.exe.sha256
-# -> 出力例: "supercheck_builder.exe: OK" が表示されれば一致
-```
-
-補足
-- ハッシュがリリースページにある「配布ファイル SHA256」と一致すれば、配布ファイルは改ざんされていないと判断できます。  
-- `.sha256` の中身は通常「<SHA256>  <ファイル名>」の一行形式です（スペースは1つでも2つでも問題ありません）。  
-- Windows の場合、SmartScreen 等で警告が出ることがありますが、ファイルのハッシュが一致していればビルド元と同一であることが確認できます。警告の扱いについて不明な点があればサポートします。
 ---
 
 ## 重要：拡張子（.spc / .pck）について
@@ -121,22 +94,33 @@ python supercheck_builder.py --input input.csv --output out.spc --format spc
 
 ---
 
-## 配布ファイルの検証方法（SHA256）
-ダウンロードした実行ファイルの整合性は SHA256 ハッシュで確認してください。Windows の例:
+## 簡単な検証手順（ダウンロード直後に推奨）
 
-PowerShell / CMD（certutil）
+ダウンロード直後に次の手順でファイルの整合性を確認してください。
+
+1. ファイル名を確認します（例: `supercheck_builder.exe`）。  
+2. SHA256 を計算し、リリースページまたは添付の `.sha256` ファイルに記載されたハッシュ値と照合します。
+
+Windows（PowerShell / CMD）:
 ```powershell
 certutil -hashfile supercheck_builder.exe SHA256
 ```
 
-表示されたハッシュがリリースノートに記載されている SHA256 と一致することを確認してください。
+Linux / macOS / Git Bash:
+```bash
+shasum -a 256 supercheck_builder.exe
+```
 
-例（本リポジトリの最新リリース時の参照値）
-- SHA256: 8e5007908832703ec9d6f4019cc44e9387b8ae7a55b5bd469e82ac0a3e000ab3  
-- ビルド元コミット: 96605c7  
-- ビルド日時 (UTC): 2025-12-29T09:35:17Z
+`.sha256` ファイルを一緒にダウンロードした場合（自動照合）
+```bash
+shasum -a 256 -c supercheck_builder.exe.sha256
+# -> 出力例: "supercheck_builder.exe: OK" が表示されれば一致
+```
 
-（上記はリリースごとに更新されます。必ず該当リリースのノートを参照してください）
+補足
+- ハッシュがリリースページにある「配布ファイル SHA256」と一致すれば、配布ファイルは改ざんされていないと判断できます。  
+- `.sha256` の中身は通常「<SHA256>  <ファイル名>」の一行形式です（スペースは1つでも2つでも問題ありません）。  
+- Windows の場合、SmartScreen 等で警告が出ることがありますが、ファイルのハッシュが一致していればビルド元と同一であることが確認できます。警告の扱いについて不明な点があればサポートします。
 
 ---
 
