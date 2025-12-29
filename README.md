@@ -3,16 +3,17 @@
 [![Release](https://img.shields.io/github/v/release/jp1lrt/hamlog-supercheck-builder?label=release&color=green)](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest) [![SHA256 verified](https://img.shields.io/badge/SHA256-verified-brightgreen)](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
-
 ## ダウンロード（Windows 実行ファイル）
 
 最新版の `supercheck_builder.exe` は GitHub Releases からダウンロードしてください：  
 https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest
 
-## 短い検証手順（ダウンロード直後に推奨）
+## 簡単な検証手順（ダウンロード直後に推奨）
 
-1. ダウンロードしたファイル名を確認（例: `supercheck_builder.exe`）。  
-2. 以下のコマンドで SHA256 を計算し、リリースページまたは添付の `.sha256` ファイルに記載のハッシュと照合してください。
+ダウンロード直後に次の手順でファイルの整合性を確認してください。
+
+1. ファイル名を確認します（例: `supercheck_builder.exe`）。  
+2. SHA256 を計算し、リリースページまたは添付の `.sha256` ファイルに記載されたハッシュ値と照合します。
 
 Windows（PowerShell / CMD）:
 ```powershell
@@ -24,18 +25,16 @@ Linux / macOS / Git Bash:
 shasum -a 256 supercheck_builder.exe
 ```
 
-3. `.sha256` ファイルを一緒にダウンロードした場合は、自動照合が可能です（Linux/macOS/Git Bash）:
+`.sha256` ファイルを一緒にダウンロードした場合（自動照合）
 ```bash
 shasum -a 256 -c supercheck_builder.exe.sha256
-# -> 出力: "supercheck_builder.exe: OK" なら一致
+# -> 出力例: "supercheck_builder.exe: OK" が表示されれば一致
 ```
 
-- 表示されたハッシュがリリースページの「配布ファイル SHA256」と一致すれば検証済みです。  
-- リリースページには `supercheck_builder.exe.sha256`（ハッシュファイル）も添付しています。
-
----
-
-（以下既存の目次・本文を続けてください）
+補足
+- ハッシュがリリースページにある「配布ファイル SHA256」と一致すれば、配布ファイルは改ざんされていないと判断できます。  
+- `.sha256` の中身は通常「<SHA256>  <ファイル名>」の一行形式です（スペースは1つでも2つでも問題ありません）。  
+- Windows の場合、SmartScreen 等で警告が出ることがありますが、ファイルのハッシュが一致していればビルド元と同一であることが確認できます。警告の扱いについて不明な点があればサポートします。
 ---
 
 ## 目次
