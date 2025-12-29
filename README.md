@@ -1,92 +1,143 @@
 # SuperCheck Builder
 
-Turbo HAMLOG の CSV から zLog/CTESTWIN 形式（.spc / .pck）のパーシャルチェックリストを生成するツールです。  
-GUI と CLI の両方を提供します。ソース（.py）を公開しますが、一般的なユーザーは再ビルド不要で使える Windows 実行ファイル（.exe）を優先して利用することを推奨します。
+Turbo HAMLOG の CSV から国内局のスーパー・チェック用リスト（zLog/CTESTWIN 形式 .spc / .pck）を生成するツールです。GUI と CLI の両方を提供します。一般ユーザーは Windows 用実行ファイル（.exe）を Releases からダウンロードしてそのまま使うことを推奨します。
 
 ---
 
-## 概要
-- Turbo HAMLOG が出力した CSV を読み、国内局（JCC/JCG を含む行）を抽出して出力します。  
-- zLog の SuperCheck（.spc）/ CTESTWIN の Partial（.pck）形式で出力できます。  
-- 既存のパーシャルチェックリスト（.spc/.pck/.txt 等）を任意で読み込み・マージ可能です。  
-- GUI（Tkinter ベース）と CLI の両方を提供します。
-
-## 推奨ユーザー
-- 一般ユーザー（インストールや Python 環境の設定を行いたくない方）は、事前にビルドした exe をダウンロードして利用してください。  
-- 開発者やカスタマイズしたい方はソース（.py）から実行・ビルドしてください。
-
-## 主要機能
-- GUI：出力形式選択（.spc / .pck）、出力ファイル拡張子の自動更新、既存リストの任意指定、出力ファイル名の自動生成  
-- CLI：自動出力（`auto`）オプション、既存ファイル引数の任意化（- を指定して未指定扱い）  
-- 既存リストが無い場合は新規作成扱いで続行可能（確認ダイアログあり）
-
-## 動作条件
-- Windows（exe を配布します）  
-- Python を使う場合：Python 3.9 以上、Tkinter（GUI を使う場合）
+## 目次
+- [特徴](#特徴)
+- [前提条件](#前提条件)
+- [ダウンロード（Windows）](#ダウンロードwindows)
+- [使い方（GUI）](#使い方gui)
+- [使い方（CLI）](#使い方cli)
+- [配布ファイルの検証方法（SHA256）](#配布ファイルの検証方法sha256)
+- [ソースからのビルド（開発者向け）](#ソースからのビルド開発者向け)
+- [ビルドメタ情報の記録](#ビルドメタ情報の記録)
+- [貢献・報告](#貢献報告)
+- [著者 / 連絡先](#著者--連絡先)
+- [ライセンス](#ライセンス)
 
 ---
 
-## クイックスタート（exe を使う）
-1. Release ページから最新の `supercheck_builder.exe` をダウンロード（Release に添付）  
-2. exe をダブルクリックして起動  
-3. GUI で「① HAMLOG CSV」を指定 → （任意）「② 既存パーシャルリスト」 → 「③ 出力ファイル」を確認して「生成」
+## 特徴
+- Turbo HAMLOG の CSV から、zLog / CTESTWIN 形式のスーパー・チェックリストを生成します。  
+- GUI（tkinter）で直感的に操作可能。  
+- CLI でバッチ処理やスクリプト組み込みが可能。  
+- 配布用 Windows 実行ファイル（.exe）を Releases に添付。
 
-クイックスタート（ソースから）
+---
+
+## 前提条件
+- 実行ファイルを使う場合: Windows（.exe をダブルクリックで実行可能）  
+- ソースから実行する場合（開発者向け）:
+  - Python 3.9 以上（3.14 など新しいバージョンでも動作確認済み）  
+  - tkinter（GUI を使う場合）
+  - 推奨: 仮想環境（venv）
+
+---
+
+## ダウンロード（Windows）
+最新版の Windows 実行ファイルは GitHub Releases からダウンロードしてください：  
+[最新版をダウンロードする](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest)
+
+配布ファイル（リリース）にはビルドのトレーサビリティ情報（ビルド元コミット、SHA256、ビルド日時）をリリースノートに記載しています。
+
+---
+
+## 使い方（GUI）
+1. Releases からダウンロードした `supercheck_builder.exe` をダブルクリックして起動します。  
+2. GUI 上で Turbo HAMLOG の CSV ファイルを選択します。  
+3. 出力形式（.spc / .pck 等）や保存先を選択して「生成」ボタンを押します。  
+4. 出力ファイルが指定したフォルダに作成されます。
+
+（GUI の詳細な操作手順やスクリーンショットは今後 README に追記します）
+
+---
+
+## 使い方（CLI）
+ソースから直接実行する場合の例：
+
+1. 仮想環境の作成と依存インストール
 ```bash
-# クローン
-git clone https://github.com/jp1lrt/hamlog-supercheck-builder.git
-cd hamlog-supercheck-builder
-
-# （推奨）仮想環境
 python -m venv venv
-venv\Scripts\activate
-
-# GUI 実行
-python supercheck_builder.py
-
-# CLI 実行例
-python supercheck_builder_v3.py hamlog.csv - auto
+source venv/bin/activate    # Windows (Git Bash / WSL) の場合
+# Windows PowerShell の場合: .\venv\Scripts\Activate.ps1
+pip install -r requirements.txt   # requirements.txt がある場合
 ```
 
-## GUI の操作（簡単）
-1. ① HAMLOG CSV：Turbo HAMLOG が出力した CSV ファイルを選択  
-2. ② 既存パーシャルリスト（任意）：既存の .spc/.pck/.txt を選ぶとマージされます（空欄可）  
-3. ③ 出力ファイル：出力先と形式（.spc/.pck）を設定。形式を変えると拡張子を自動更新します。  
-4. 「生成」ボタンでファイルを作成。既存ファイルがない場合は新規作成として処理されます。
-
-## CLI の主な使い方
-- 基本:
-  python supercheck_builder_v3.py <hamlog.csv> <existing.txt_or_-> <out.txt_or_auto>
-- 例: CSV から自動で .spc を生成
-  python supercheck_builder_v3.py hamlog.csv - auto
-- 既存ファイルを指定してマージ
-  python supercheck_builder_v3.py hamlog.csv existing.spc out.spc
-
----
-
-## ビルド（Windows exe）
-ローカルで exe を作る場合は pyinstaller を推奨します（Windows 環境で実行）。
+2. ヘルプ表示（例）
 ```bash
-pip install pyinstaller
-pyinstaller --onefile --windowed supercheck_builder.py
-# 生成物: dist\supercheck_builder.exe
+python supercheck_builder.py --help
 ```
-生成後に必ず動作確認（実際に CSV を読み込んで .spc/.pck を出力）してください。
 
-## リリース手順（簡易）
-1. main を最新にする:
-   git checkout main
-   git pull origin main
-2. バージョンタグを付ける:
-   git tag -a vX.Y.Z -m "Release vX.Y.Z"
-   git push origin vX.Y.Z
-3. GitHub の Release を作成し、dist の exe を添付
+3. バッチ実行の例（入力 CSV → 出力ファイル指定）
+```bash
+python supercheck_builder.py --input input.csv --output out.spc --format spc
+```
+
+（実際の CLI オプションはスクリプトの `--help` を参照してください）
 
 ---
 
-## テスト（確認手順）
-- GUI: 少量の HAMLOG CSV を使って .spc/.pck を生成し、zLog / CTESTWIN で読み込めるか確認する。  
-- CLI: 上述の CLI 例で自動生成とマージを試す。
+## 配布ファイルの検証方法（SHA256）
+ダウンロードした実行ファイルの整合性は SHA256 ハッシュで確認してください。Windows の例:
+
+PowerShell / CMD（certutil）
+```powershell
+certutil -hashfile supercheck_builder.exe SHA256
+```
+
+表示されたハッシュがリリースノートに記載されている SHA256 と一致することを確認してください。
+
+例（本リポジトリの最新リリース時の参照値）
+- SHA256: 8e5007908832703ec9d6f4019cc44e9387b8ae7a55b5bd469e82ac0a3e000ab3  
+- ビルド元コミット: 96605c7  
+- ビルド日時 (UTC): 2025-12-29T09:35:17Z
+
+（上記はリリースごとに更新されます。必ず該当リリースのノートを参照してください）
+
+---
+
+## ソースからのビルド（開発者向け）
+PyInstaller を使って Windows 用の単一 exe を作成できます（Windows 上で実行してください）。
+
+1. 仮想環境を作る・有効化して依存をインストール
+```bash
+python -m venv venv
+.\venv\Scripts\activate     # PowerShell の場合
+pip install -r requirements.txt
+pip install pyinstaller
+```
+
+2. ビルド実行（例）
+```bash
+pyinstaller --onefile --windowed supercheck_builder.py
+```
+
+3. 出力は `dist/supercheck_builder.exe` に生成されます。生成後は SHA256 を取得し、リリースに添付してください。
+
+---
+
+## ビルドメタ情報の記録
+配布のトレーサビリティを確保するため、ビルドごとに次の情報を保存しておくことを推奨します：
+- ビルド元コミット（短縮コミット ID）  
+- 実行ファイルの SHA256  
+- ビルド日時（UTC）
+
+例: `dist/build_info.txt`
+```
+commit: 96605c7
+sha256: 8e5007908832703ec9d6f4019cc44e9387b8ae7a55b5bd469e82ac0a3e000ab3
+built: 2025-12-29T09:35:17Z
+```
+
+リリース作成時には、上の情報をリリースノートに記載し、実行ファイルを添付してください。
+
+---
+
+## 貢献・報告
+バグ報告や機能要望は GitHub Issues で受け付けています。プルリクエスト歓迎。  
+貢献の際はできるだけ小さな変更単位で、変更点を明記して送ってください。
 
 ---
 
@@ -94,7 +145,12 @@ pyinstaller --onefile --windowed supercheck_builder.py
 津久浦 慶治 (Yoshiharu Tsukuura) — コールサイン: JP1LRT  
 GitHub: https://github.com/jp1lrt
 
+---
+
 ## ライセンス
-このプロジェクトは MIT ライセンスの下で公開します。LICENSE ファイルを参照してください。
+このプロジェクトは MIT License のもとで公開されています。詳しくは `LICENSE` ファイルを参照してください。
 
 ---
+
+## 連絡
+問題や質問があれば Issues を開いてください。リリースや配布に関する重要な変更はリリースノートにて告知します。
