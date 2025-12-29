@@ -271,9 +271,14 @@ def _pick_file(title: str, filetypes: List[Tuple[str, str]]) -> Optional[str]:
     return filedialog.askopenfilename(title=title, filetypes=filetypes)
 
 
-def _pick_save(title: str, defaultextension: str, filetypes: List[Tuple[str, str]]) -> Optional[str]:
+def _pick_save(title: str, defaultextension: str, filetypes: List[Tuple[str, str]], initialfile: str = "") -> Optional[str]:
     from tkinter import filedialog
-    return filedialog.asksaveasfilename(title=title, defaultextension=defaultextension, filetypes=filetypes)
+    return filedialog.asksaveasfilename(
+        title=title,
+        defaultextension=defaultextension,
+        filetypes=filetypes,
+        initialfile=initialfile
+    )
 
 
 def run_gui() -> None:
@@ -288,6 +293,7 @@ def run_gui() -> None:
     v_exist = tk.StringVar()
     v_out = tk.StringVar()
     v_domestic = tk.BooleanVar(value=True)
+    v_format = tk.StringVar(value=".spc")  # Output format: .spc or .pck
 
     # layout
     pad = {"padx": 8, "pady": 6}
@@ -295,37 +301,84 @@ def run_gui() -> None:
     frm = tk.Frame(root)
     frm.pack(fill="both", expand=True, **pad)
 
-    def row(y: int, label: str, var: tk.StringVar, btn_text: str, cmd):
+    def row(y: int, label: str, var: tk.StringVar, btn_text: str, cmd, btn2_text: str = None, cmd2 = None):
         tk.Label(frm, text=label, anchor="w").grid(row=y, column=0, sticky="w")
         tk.Entry(frm, textvariable=var, width=70).grid(row=y, column=1, sticky="we", padx=6)
         tk.Button(frm, text=btn_text, command=cmd).grid(row=y, column=2, sticky="e")
+        if btn2_text and cmd2:
+            tk.Button(frm, text=btn2_text, command=cmd2).grid(row=y, column=3, sticky="e")
 
     frm.columnconfigure(1, weight=1)
+
+    def update_output_extension():
+        """Update output file extension based on selected format"""
+        out_path = v_out.get()
+        if out_path:
+            p = Path(out_path)
+            new_ext = v_format.get()
+            new_path = p.with_suffix(new_ext)
+            v_out.set(str(new_path))
 
     def pick_csv():
         p = _pick_file("Turbo HAMLOG CSV を選択", [("CSV", "*.csv"), ("All files", "*.*")])
         if p:
             v_csv.set(p)
+            # Auto-generate output path based on CSV name
+            csv_path = Path(p)
+            out_ext = v_format.get()
+            out_path = csv_path.with_suffix(out_ext)
+            v_out.set(str(out_path))
 
     def pick_exist():
-        p = _pick_file("既存のパーシャルチェックリストを選択", [("Text", "*.txt;*.lst;*.dat"), ("All files", "*.*")])
+        p = _pick_file("既存のパーシャルチェックリストを選択", [
+            ("SuperCheck", "*.spc;*.pck"),
+            ("Text", "*.txt;*.lst;*.dat"),
+            ("All files", "*.*")
+        ])
         if p:
             v_exist.set(p)
+            # Auto-select format based on existing file extension
+            ext = Path(p).suffix.lower()
+            if ext in [".spc", ".pck"]:
+                v_format.set(ext)
+                update_output_extension()
+
+    def clear_exist():
+        v_exist.set("")
 
     def pick_out():
-        p = _pick_save("出力先を指定", ".txt", [("Text", "*.txt"), ("All files", "*.*")])
+        out_ext = v_format.get()
+        # Generate initial filename based on CSV if available
+        initial_name = ""
+        if v_csv.get():
+            csv_path = Path(v_csv.get())
+            initial_name = csv_path.stem + out_ext
+        
+        p = _pick_save(
+            "出力先を指定",
+            out_ext,
+            [("SuperCheck .spc", "*.spc"), ("SuperCheck .pck", "*.pck"), ("Text", "*.txt"), ("All files", "*.*")],
+            initialfile=initial_name
+        )
         if p:
             v_out.set(p)
 
     row(0, "① HAMLOG CSV（今回の追加分）", v_csv, "参照…", pick_csv)
-    row(1, "② 既存パーシャルリスト（マージ元）", v_exist, "参照…", pick_exist)
+    row(1, "② 既存パーシャルリスト（任意）", v_exist, "参照…", pick_exist, "クリア", clear_exist)
     row(2, "③ 出力ファイル（上書き/新規）", v_out, "保存先…", pick_out)
 
-    tk.Checkbutton(frm, text="国内局のみ（JCC/JCG がある行だけ採用）", variable=v_domestic).grid(row=3, column=1, sticky="w", pady=4)
+    # Output format radio buttons
+    fmt_frame = tk.Frame(frm)
+    fmt_frame.grid(row=3, column=1, sticky="w", pady=4)
+    tk.Label(fmt_frame, text="出力形式:").pack(side="left", padx=(0, 10))
+    tk.Radiobutton(fmt_frame, text=".spc", variable=v_format, value=".spc", command=update_output_extension).pack(side="left", padx=5)
+    tk.Radiobutton(fmt_frame, text=".pck", variable=v_format, value=".pck", command=update_output_extension).pack(side="left", padx=5)
+
+    tk.Checkbutton(frm, text="国内局のみ（JCC/JCG がある行だけ採用）", variable=v_domestic).grid(row=4, column=1, sticky="w", pady=4)
 
     log = tk.Text(frm, height=10, width=90)
-    log.grid(row=4, column=0, columnspan=3, sticky="nsew", pady=6)
-    frm.rowconfigure(4, weight=1)
+    log.grid(row=5, column=0, columnspan=4, sticky="nsew", pady=6)
+    frm.rowconfigure(5, weight=1)
 
     def write_log(s: str):
         log.insert("end", s + "\n")
@@ -334,21 +387,39 @@ def run_gui() -> None:
     def on_run():
         try:
             csv_path = Path(v_csv.get()).expanduser()
-            exist_path = Path(v_exist.get()).expanduser()
+            exist_path = Path(v_exist.get()).expanduser() if v_exist.get().strip() else None
             out_path = Path(v_out.get()).expanduser()
 
             if not csv_path.exists():
                 messagebox.showerror("エラー", "HAMLOG CSV が見つかりません。")
                 return
-            if not exist_path.exists():
-                messagebox.showerror("エラー", "既存リストが見つかりません。")
-                return
+            
+            # Check if existing file is specified and exists
+            existing_map = {}
+            header = []
+            is_initial_creation = False
+            
+            if exist_path and exist_path != Path("."):
+                if not exist_path.exists():
+                    # Show confirmation dialog for missing existing file
+                    result = messagebox.askyesno(
+                        "確認",
+                        f"既存パーシャルリストが見つかりません:\n{exist_path}\n\n新規作成で続行しますか？"
+                    )
+                    if not result:
+                        return
+                    is_initial_creation = True
+                    write_log(f"[1] 既存リストなし（初回作成）")
+                else:
+                    write_log(f"[1] 既存リスト読込: {exist_path}")
+                    existing_map, header = read_existing_supercheck(exist_path)
+                    write_log(f"    既存: {len(existing_map)} 件")
+            else:
+                is_initial_creation = True
+                write_log(f"[1] 既存リストなし（初回作成）")
+
             if not out_path.parent.exists():
                 out_path.parent.mkdir(parents=True, exist_ok=True)
-
-            write_log(f"[1] 既存リスト読込: {exist_path}")
-            existing_map, header = read_existing_supercheck(exist_path)
-            write_log(f"    既存: {len(existing_map)} 件")
 
             write_log(f"[2] CSV 読込: {csv_path}")
             new_map = read_hamlog_csv_calls(csv_path, keep_domestic_only=bool(v_domestic.get()))
@@ -371,33 +442,94 @@ def run_gui() -> None:
             write_log(f"!! {type(e).__name__}: {e}")
 
     btn = tk.Button(frm, text="生成（マージ→ソート→重複削除）", command=on_run, height=2)
-    btn.grid(row=5, column=0, columnspan=3, sticky="we", pady=8)
+    btn.grid(row=6, column=0, columnspan=4, sticky="we", pady=8)
 
     root.minsize(900, 450)
     root.mainloop()
 
 
 def main(argv: List[str]) -> int:
-    # CLI でも動かせるように（将来用）。基本は GUI でOK。
+    # CLI でも動かせるように。基本は GUI でOK。
     if len(argv) == 1:
         run_gui()
         return 0
 
-    if len(argv) != 4:
-        print("使い方: python supercheck_builder_v3.py <hamlog.csv> <existing.txt> <out.txt>")
-        return 2
+    # CLI mode with flexible arguments
+    # Usage patterns:
+    # 1. python supercheck_builder.py <csv>                        -> auto-generate output as csv_name.spc
+    # 2. python supercheck_builder.py <csv> <out>                  -> output to specified file
+    # 3. python supercheck_builder.py <csv> <existing> <out>       -> merge with existing
+    # 4. python supercheck_builder.py <csv> auto                   -> auto-generate .spc output
+    # 5. python supercheck_builder.py <csv> auto.pck               -> auto-generate .pck output
+    # 6. python supercheck_builder.py <csv> -                      -> output to stdout
+    # 7. python supercheck_builder.py <csv> <existing> auto        -> merge and auto-generate .spc
+    # 8. python supercheck_builder.py <csv> <existing> auto.pck    -> merge and auto-generate .pck
+    # 9. python supercheck_builder.py <csv> <existing> -           -> merge and output to stdout
 
     csv_path = Path(argv[1])
-    exist_path = Path(argv[2])
-    out_path = Path(argv[3])
+    existing_map = {}
+    out_path = None
+    
+    if len(argv) == 2:
+        # Pattern 1: auto-generate .spc output
+        out_path = csv_path.with_suffix(".spc")
+    elif len(argv) == 3:
+        # Pattern 2, 4, 5, 6
+        arg2 = argv[2]
+        if arg2 == "auto":
+            out_path = csv_path.with_suffix(".spc")
+        elif arg2 == "auto.pck":
+            out_path = csv_path.with_suffix(".pck")
+        elif arg2 == "-":
+            out_path = None  # stdout
+        else:
+            out_path = Path(arg2)
+    elif len(argv) == 4:
+        # Pattern 3, 7, 8, 9
+        exist_path = Path(argv[2])
+        if exist_path.exists():
+            existing_map, _ = read_existing_supercheck(exist_path)
+        
+        arg3 = argv[3]
+        if arg3 == "auto":
+            out_path = csv_path.with_suffix(".spc")
+        elif arg3 == "auto.pck":
+            out_path = csv_path.with_suffix(".pck")
+        elif arg3 == "-":
+            out_path = None  # stdout
+        else:
+            out_path = Path(arg3)
+    else:
+        print("使い方:")
+        print("  python supercheck_builder.py                           # GUI起動")
+        print("  python supercheck_builder.py <csv>                     # auto生成 (.spc)")
+        print("  python supercheck_builder.py <csv> <out>               # 出力先指定")
+        print("  python supercheck_builder.py <csv> <existing> <out>    # マージして出力")
+        print("")
+        print("  <out> には以下を指定可能:")
+        print("    auto      : CSV名ベースで .spc を自動生成")
+        print("    auto.pck  : CSV名ベースで .pck を自動生成")
+        print("    -         : 標準出力")
+        print("    ファイル名 : 指定したファイルに出力")
+        return 2
 
-    existing_map, _ = read_existing_supercheck(exist_path)
     new_map = read_hamlog_csv_calls(csv_path, keep_domestic_only=True)
 
     merged = dict(existing_map)
     merged.update(new_map)
-    write_supercheck(out_path, merged, header_lines=[])
-    print(f"OK: {out_path} ({len(merged)}件)")
+    
+    if out_path is None:
+        # Output to stdout
+        for call in sorted(merged.keys()):
+            exch = merged[call].strip()
+            if exch:
+                print(f"{call} {exch}")
+            else:
+                print(f"{call}")
+    else:
+        write_supercheck(out_path, merged, header_lines=[])
+        print(f"OK: {out_path} ({len(merged)}件)")
+    
     return 0
 
 
