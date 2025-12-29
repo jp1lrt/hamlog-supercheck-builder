@@ -26,7 +26,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 # --- 正規表現（ゆるめに） -------------------------------------------------
 
@@ -301,7 +301,7 @@ def run_gui() -> None:
     frm = tk.Frame(root)
     frm.pack(fill="both", expand=True, **pad)
 
-    def row(y: int, label: str, var: tk.StringVar, btn_text: str, cmd, btn2_text: str = None, cmd2 = None):
+    def row(y: int, label: str, var: tk.StringVar, btn_text: str, cmd, btn2_text: Optional[str] = None, cmd2: Optional[Callable[[], None]] = None):
         tk.Label(frm, text=label, anchor="w").grid(row=y, column=0, sticky="w")
         tk.Entry(frm, textvariable=var, width=70).grid(row=y, column=1, sticky="we", padx=6)
         tk.Button(frm, text=btn_text, command=cmd).grid(row=y, column=2, sticky="e")
@@ -399,7 +399,7 @@ def run_gui() -> None:
             header = []
             is_initial_creation = False
             
-            if exist_path and exist_path != Path("."):
+            if exist_path and exist_path.name != ".":
                 if not exist_path.exists():
                     # Show confirmation dialog for missing existing file
                     result = messagebox.askyesno(
@@ -449,7 +449,17 @@ def run_gui() -> None:
 
 
 def main(argv: List[str]) -> int:
-    # CLI でも動かせるように。基本は GUI でOK。
+    """
+    Main entry point for SuperCheck Builder.
+    
+    When called without arguments, launches the GUI.
+    When called with arguments, runs in CLI mode with flexible argument parsing.
+    
+    CLI supports multiple patterns for ease of use:
+    - Auto-generation: auto generates .spc, auto.pck generates .pck
+    - Stdout output: use - to output to stdout for piping
+    - Optional existing file: can create new lists or merge with existing
+    """
     if len(argv) == 1:
         run_gui()
         return 0
