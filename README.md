@@ -1,7 +1,20 @@
 # SuperCheck Builder
+[![Release](https://img.shields.io/github/v/release/jp1lrt/hamlog-supercheck-builder?label=release&color=green)](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest) [![SHA256 verified](https://img.shields.io/badge/SHA256-verified-brightgreen)](https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+ダウンロード（Windows 実行ファイル）
+- 最新版の `supercheck_builder.exe` は GitHub Releases からダウンロードできます：  
+  https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest
+
+短い検証手順（ダウンロード直後に推奨）
+1. ダウンロードしたファイル名を確認（例: `supercheck_builder.exe`）。  
+2. SHA256 を計算してリリースノート記載のハッシュと照合してください。
+
+Windows（PowerShell / CMD）:
 Turbo HAMLOG の CSV から国内局のスーパー・チェック用リスト（zLog/CTESTWIN 形式 .spc / .pck）を生成するツールです。GUI と CLI の両方を提供します。一般ユーザーは Windows 用実行ファイル（.exe）を Releases からダウンロードしてそのまま使うことを推奨します。
-
+Linux / macOS:
+shasum -a 256 supercheck_builder.exe
+- 表示されたハッシュがリリースページの `配布ファイル SHA256` と一致すれば検証済みです。  
+- リリースには `supercheck_builder.exe.sha256`（ハッシュファイル）も添付してあります。`shasum -a 256 -c supercheck_builder.exe.sha256` で自動チェックできます（Linux/macOS/Git Bash）。
 ---
 
 ## 目次
