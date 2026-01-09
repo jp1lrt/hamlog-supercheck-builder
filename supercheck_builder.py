@@ -860,7 +860,7 @@ def run_gui() -> None:
     # 詳細優先
     tk.Checkbutton(
         frm,
-        text="詳細優先クリーンアップ（09003J優先・完全があれば都道府県2桁削除）",
+        text="詳細優先クリーンアップ（例：09003より09003Jを優先／完全があれば都道府県2桁は削除）",
         variable=v_detail_cleanup,
     ).grid(row=v_row + 2, column=1, sticky="w", pady=2)
 
@@ -979,7 +979,7 @@ def run_gui() -> None:
             # 詳細優先クリーンアップ（任意）
             detail_changes: Dict[str, Dict[str, List[str]]] = {}
             if bool(v_detail_cleanup.get()):
-                write_log("[3.5] 詳細優先クリーンアップ: ON（09003J優先・完全があれば都道府県2桁削除）")
+                write_log("[3.5] 詳細優先クリーンアップ: ON（例：09003より09003Jを優先／完全があれば都道府県2桁は削除）")
                 merged, detail_changes = detail_cleanup_map(merged)
                 write_log(f"    影響CALL数: {len(detail_changes)}")
             else:
