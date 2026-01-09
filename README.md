@@ -69,7 +69,8 @@ https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest
 - 海外局など **JCC/JCG が無い行** は（設定により）除外できます  
   ※もし取り切れないケースがあっても、最終的に海外局は手動で削除する運用でもOKです
 ---
-![SuperCheck Builder GUI](spcpck.png)
+![SuperCheck Builder GUI](images/gui.png)
+
 
 ## 使い方（GUI）
 1. Releases からダウンロードした `supercheck_builder.exe` をダブルクリックして起動します。  
