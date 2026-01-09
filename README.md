@@ -25,12 +25,23 @@ https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest
 
 ## 特徴
 
-- Turbo HAMLOG の CSV から **国内局（JCC/JCG が入っている行）** を抽出
+- Turbo HAMLOG の CSV から **国内局（JCC/JCG が入っている行）** を抽出（設定で OFF も可）
 - 既存のパーシャルリスト（任意）と **マージ**
 - コールサインで **ソート**
-- 重複は **自動削除**（同一CALLは **CSV側を優先**）
+- マージ方式を GUI で選択可能  
+  - **上書き（CSV優先）**  
+  - **追加（既存優先：空欄のみ補完）**  
+  - **併記（既存＋CSV）**：同一コールでも **複数 QTH を複数行で出力**
+- 既存の不完全行（CALLのみ／都道府県2桁のみ）を整理（設定で ON/OFF 可）  
+  - CSVに完全情報があれば補完、なければ削除
+- 詳細優先クリーンアップ（設定で ON/OFF 可）  
+  - 例：`09003` と `09003J` なら **後者を優先**（より詳細）  
+  - 完全な JCC/JCG があれば **都道府県2桁の行は削除**
+- 上書き時、**既存の方が詳細なら既存を残す**（例：`29012A` を保護）（設定で ON/OFF 可）
+- マージ結果のレポート TXT を出力可能（任意）
 - GUI（tkinter）で直感的に操作可能
 - Windows用の単体 `.exe` を Releases で配布
+
 
 ---
 
@@ -71,14 +82,23 @@ https://github.com/jp1lrt/hamlog-supercheck-builder/releases/latest
 ---
 
 ## 使い方（CLI）
-ソースから直接実行する場合の例：
+ソースから直接実行する場合の例（簡易CLI）：
 
-1. 仮想環境の作成と依存インストール
 ```bash
-python -m venv venv
-source venv/bin/activate    # Windows (Git Bash / WSL) の場合
-# Windows PowerShell の場合: .\venv\Scripts\Activate.ps1
-pip install -r requirements.txt   # requirements.txt がある場合
+python supercheck_builder.py <hamlog.csv> <existing.spc_or_pck_or_txt_or_empty_or-> <out.spc_or_pck_or_auto>
+
+# 既存リストを指定して出力（.spc / .pck は拡張子で判別）
+python supercheck_builder.py hamlog.csv existing.pck out.pck
+
+# 既存リストなし（新規作成）
+python supercheck_builder.py hamlog.csv - out.spc
+
+# 出力を自動生成（CSV名に .spc を付ける）
+python supercheck_builder.py hamlog.csv existing.pck auto
+
+# 出力を自動生成（CSV名に .pck を付ける）
+python supercheck_builder.py hamlog.csv existing.pck auto.pck
+
 ```
 
 2. ヘルプ表示（例）
